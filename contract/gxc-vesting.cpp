@@ -53,7 +53,6 @@ public:
         int64_t claim_account_id = get_account_id(claim_account.c_str(), claim_account.size());
         graphene_assert(claim_account_id >= 0, "invalid claim_account");
 
-        print("claim_limit:", claim_limit, "\n");
         // update vesting table
         auto iter = vestingtab.find(claim_account_id);
         if (iter == vestingtab.end()) {
@@ -84,18 +83,18 @@ public:
         graphene_assert(now >= start_time, "vesting time not yet come");
         graphene_assert(now - iter->last_claim_time >= claim_period_sec, "vesting time not yet come");
 
-        uint64_t amnt = std::min(iter->total_amount, iter->claim_limit);
-        graphene_assert(amnt > 0, "vesting balance not enough");
+        uint64_t claim_amount = std::min(iter->total_amount, iter->claim_limit);
+        graphene_assert(claim_amount > 0, "vesting balance not enough");
 
         // update vesting
         vestingtab.modify(iter, sender, [&](auto &o) {
-                o.total_amount -= amnt;
+                o.total_amount -= claim_amount;
                 o.last_claim_time = now;
                 });
 
         // transfer GXC
         string memo = "claim vesting GXC";
-        inline_transfer(_self, sender, contract_asset_id, claim_limit, memo.c_str(), memo.size());
+        inline_transfer(_self, sender, contract_asset_id, claim_amount, memo.c_str(), memo.size());
     }
 
 private:
