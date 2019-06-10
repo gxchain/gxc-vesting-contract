@@ -16,13 +16,13 @@ const uint64_t contract_asset_id = 1; //GXC
 const char * permission_account = "gxbfoundation";
 
 // time at which the first claim period begins
-const char* start_time = "2018-12-19T14:27:40";
+uint64_t start_time = 1560139200; // 2019-06-10T04:00:00
 
 // length of the claim period in seconds
 const uint64_t claim_period_sec = 365 * 24 * 3600;
 
 // claim limit in a given claim period
-const uint64_t claim_limit = 500 * 10000;
+const uint64_t claim_limit = (uint64_t)10 * 10000 * 100000;
 
 class vesting : public contract
 {
@@ -34,34 +34,37 @@ public:
     }
 
     /// @abi action
+    /// @abi payable
     void vestingcreate(std::string claim_account)
     {
         // only permission_account can create vesting
         uint64_t sender = get_trx_sender();
         uint64_t permission_account_id = get_account_id(permission_account, strlen(permission_account));
-        graphene_assert(sender == permission_account_id, "no claim permission");
+        graphene_assert(sender == permission_account_id, "no vesting create permission");
 
         // only support GXC
         graphene_assert(contract_asset_id == get_action_asset_id(), "only suppor GXC");
-        int64_t amnt = get_action_asset_amount();
-	graphene_assert(amnt > 0, "amount must > 0");
 
-        // get claim_account
+        // asset amount must > 0
+        int64_t amnt = get_action_asset_amount();
+        graphene_assert(amnt > 0, "amount must > 0");
+
+        // check claim_account
         int64_t claim_account_id = get_account_id(claim_account.c_str(), claim_account.size());
         graphene_assert(claim_account_id >= 0, "invalid claim_account");
 
+        print("claim_limit:", claim_limit, "\n");
         // update vesting table
         auto iter = vestingtab.find(claim_account_id);
         if (iter == vestingtab.end()) {
-            vestingtab.emplace(0, [&](auto &o) {
+            vestingtab.emplace(sender, [&](auto &o) {
                     o.total_amount = amnt;
                     o.claim_account = claim_account_id;
                     o.claim_limit = claim_limit;
                     o.last_claim_time = 0;
                     });
-        }
-        else {
-            vestingtab.modify(iter, 0, [&](auto &o) {
+        } else {
+            vestingtab.modify(iter, sender, [&](auto &o) {
                     o.total_amount += amnt;
                     });
         }
@@ -71,18 +74,21 @@ public:
     void vestingclaim()
     {
         uint64_t sender = get_trx_sender();
-        uint64_t now = get_head_block_time();
 
         // check vesting exists
         auto iter = vestingtab.find(sender);
         graphene_assert(iter != vestingtab.end(), "current account have no vesting");
 
-        // check seconds
+        // check vesting claim seconds
+        uint64_t now = get_head_block_time();
+        graphene_assert(now >= start_time, "vesting time not yet come");
         graphene_assert(now - iter->last_claim_time >= claim_period_sec, "vesting time not yet come");
 
-        uint64_t amnt = std::max(iter->total_amount, iter->claim_limit);
+        uint64_t amnt = std::min(iter->total_amount, iter->claim_limit);
+        graphene_assert(amnt > 0, "vesting balance not enough");
+
         // update vesting
-        vestingtab.modify(iter, 0, [&](auto &o) {
+        vestingtab.modify(iter, sender, [&](auto &o) {
                 o.total_amount -= amnt;
                 o.last_claim_time = now;
                 });
@@ -93,10 +99,10 @@ public:
     }
 
 private:
-    // @abi table vesting
+    // @abi table vestinginfo i64
     struct vestinginfo {
 	    uint64_t claim_account;  // account who can claim vesting
-	    uint64_t total_amount;
+	    uint64_t total_amount; // total vesting amount
 	    uint64_t last_claim_time; // last claim time
 	    uint64_t claim_limit;  // claim limit once
 
@@ -111,4 +117,4 @@ private:
     vesting_index vestingtab;
 };
 
-GRAPHENE_ABI(vesting, (vestingclaim))
+GRAPHENE_ABI(vesting, (vestingcreate)(vestingclaim))
