@@ -48,10 +48,10 @@ void vestingclaim()
 {
 // 获取sender
 // 从vestinginfo表中查询sender对应的记录
-// 如果查不到对应记录，则中止
+// 如果查不到sender对应的vesting记录，则中止
 // 检查当前时间，必须最早申领时间start_time
 // 检查当前时间，必须大于 最近一次申领时间(last_claim_time) + 申领间隔(claim_period_sec)
-// 更新vestinginfo表，更新总量(total_amount)和最近一次的申领时间(last_claim_time)
+// 更新vestinginfo表中sender对应的vesting记录，更新总量(total_amount)和最近一次的申领时间(last_claim_time)
 // 转帐给sender, 转帐数量为total_amount和claim_limit最小值
 }
 ```
