@@ -17,7 +17,7 @@ const uint64_t contract_asset_id = 1; //GXC
 const char * foundation_account = "gxbfoundation";
 
 // time at which the first claim period begins
-uint64_t start_time = 1560139200; // 2019-06-10T04:00:00
+uint64_t start_time = 1577836800; // '2020-01-01T00:00:00'
 
 // length of the claim period in seconds
 const uint64_t claim_period_sec = 365 * 24 * 3600;
@@ -25,6 +25,7 @@ const uint64_t claim_period_sec = 365 * 24 * 3600;
 // claim limit in a given claim period
 const uint64_t claim_limit = (uint64_t)500 * 10000 * 100000;
 
+// total claim count
 const uint64_t total_claim_count = 8;
 
 class vesting : public contract
