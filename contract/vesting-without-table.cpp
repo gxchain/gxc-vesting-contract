@@ -57,17 +57,14 @@ public:
       uint64_t now = get_head_block_time();
       graphene_assert(now >= start_time, "First claim time not arrived");
 
-      int64_t current_claim_count = ((uint64_t)total_claim_amount - total_balance) / claim_limit;
+      int64_t current_claim_count = ceil(1.0 * ((uint64_t)total_claim_amount - total_balance) / claim_limit);
       if (current_claim_count < 0) {
           current_claim_count = 0;
       }
 
-      print(current_claim_count, "\n");
-
       int64_t expect_claim_count = ((int64_t)now - start_time) / claim_period_sec;
       graphene_assert(current_claim_count <= expect_claim_count, "Next claim time has not arrived");
 
-      print(expect_claim_count, "\n");
       // limit claim amount
       uint64_t claim_amount = std::min(total_balance, claim_limit);
       graphene_assert(claim_amount > 0, "Insufficient balance");
