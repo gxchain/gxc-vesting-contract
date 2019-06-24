@@ -23,10 +23,10 @@ uint64_t start_time = 1577836800; // '2020-01-01T00:00:00'
 const int64_t claim_period_sec = 365 * 24 * 3600;
 
 // claim limit in a given claim period
-const uint64_t claim_limit = (uint64_t)500 * 10000 * 100000;
+const int64_t claim_limit = (uint64_t)500 * 10000 * 100000;
 
 // total claim amount
-const uint64_t total_claim_amount = (uint64_t)4000 * 10000 * 100000;
+const int64_t total_claim_amount = (uint64_t)4000 * 10000 * 100000;
 
 // total claim count
 const int64_t total_claim_count = 8;
@@ -50,14 +50,14 @@ public:
       graphene_assert(sender == foundation_account_id, "Only foundation account can claim vesting balances");
 
       // get contract balance
-      uint64_t total_balance = get_balance(_self, contract_asset_id);
+      int64_t total_balance = get_balance(_self, contract_asset_id);
       graphene_assert(total_balance > 0, "Insufficient balance of contract");
 
       // check vesting claim count
       uint64_t now = get_head_block_time();
       graphene_assert(now >= start_time, "First claim time not arrived");
 
-      int64_t current_claim_count = ceil(1.0 * ((uint64_t)total_claim_amount - total_balance) / claim_limit);
+      int64_t current_claim_count = ceil(1.0 * (total_claim_amount - total_balance) / claim_limit);
       if (current_claim_count < 0) {
           current_claim_count = 0;
       }
