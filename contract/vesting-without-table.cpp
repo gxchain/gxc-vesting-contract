@@ -57,7 +57,7 @@ public:
       uint64_t now = get_head_block_time();
       graphene_assert(now >= start_time, "First claim time not arrived");
 
-      int64_t current_claim_count = (total_claim_amount - total_balance) / claim_limit;
+      int64_t current_claim_count = ((uint64_t)total_claim_amount - total_balance) / claim_limit;
       if (current_claim_count < 0) {
           current_claim_count = 0;
       }
