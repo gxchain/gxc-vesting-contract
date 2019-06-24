@@ -48,12 +48,19 @@ public:
 
       // get contract balance
       uint64_t total_balance = get_balance(_self, contract_asset_id);
+      graphene_assert(total_balance > 0, "Insufficient balance of contract");
 
       // check vesting claim seconds
       uint64_t now = get_head_block_time();
-      uint64_t current_claim_count = total_claim_count - total_balance / claim_limit;
-      uint64_t expect_claim_count = (now - start_time) / claim_period_sec;
-      graphene_assert(current_claim_count >= expect_claim_count, "Time has not arrived");
+      int64_t current_claim_count = total_claim_count - total_balance / claim_limit;
+      if (current_claim_count < 0) {
+          current_claim_count = total_claim_count;
+      }
+
+      int64_t expect_claim_count = ((int64_t)now - start_time) / claim_period_sec;
+
+      graphene_assert(now >= start_time, "Start claim time not arrived");
+      graphene_assert(current_claim_count <= expect_claim_count, "Next claim time has not arrived");
 
       // limit claim amount
       uint64_t claim_amount = std::min(total_balance, claim_limit);
