@@ -20,13 +20,16 @@ const char * foundation_account = "gxbfoundation";
 uint64_t start_time = 1577836800; // '2020-01-01T00:00:00'
 
 // length of the claim period in seconds
-const uint64_t claim_period_sec = 365 * 24 * 3600;
+const int64_t claim_period_sec = 365 * 24 * 3600;
 
 // claim limit in a given claim period
 const uint64_t claim_limit = (uint64_t)500 * 10000 * 100000;
 
+// total claim amount
+const uint64_t total_claim_amount = (uint64_t)4000 * 10000 * 100000;
+
 // total claim count
-const uint64_t total_claim_count = 8;
+const int64_t total_claim_count = 8;
 
 class vesting : public contract
 {
@@ -54,14 +57,17 @@ public:
       uint64_t now = get_head_block_time();
       graphene_assert(now >= start_time, "First claim time not arrived");
 
-      int64_t current_claim_count = total_claim_count - total_balance / claim_limit;
+      int64_t current_claim_count = (total_claim_amount - total_balance) / claim_limit;
       if (current_claim_count < 0) {
-          current_claim_count = total_claim_count;
+          current_claim_count = 0;
       }
 
-      int64_t expect_claim_count = ((int64_t)now - start_time) / claim_period_sec;
-      graphene_assert(current_claim_count <= expect_claim_count + 1, "Next claim time has not arrived");
+      print(current_claim_count, "\n");
 
+      int64_t expect_claim_count = ((int64_t)now - start_time) / claim_period_sec;
+      graphene_assert(current_claim_count <= expect_claim_count, "Next claim time has not arrived");
+
+      print(expect_claim_count, "\n");
       // limit claim amount
       uint64_t claim_amount = std::min(total_balance, claim_limit);
       graphene_assert(claim_amount > 0, "Insufficient balance");
