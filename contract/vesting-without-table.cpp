@@ -50,7 +50,7 @@ public:
       uint64_t total_balance = get_balance(_self, contract_asset_id);
       graphene_assert(total_balance > 0, "Insufficient balance of contract");
 
-      // check vesting claim seconds
+      // check vesting claim count
       uint64_t now = get_head_block_time();
       graphene_assert(now >= start_time, "First claim time not arrived");
 
