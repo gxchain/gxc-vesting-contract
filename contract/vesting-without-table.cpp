@@ -52,15 +52,15 @@ public:
 
       // check vesting claim seconds
       uint64_t now = get_head_block_time();
+      graphene_assert(now >= start_time, "First claim time not arrived");
+
       int64_t current_claim_count = total_claim_count - total_balance / claim_limit;
       if (current_claim_count < 0) {
           current_claim_count = total_claim_count;
       }
 
       int64_t expect_claim_count = ((int64_t)now - start_time) / claim_period_sec;
-
-      graphene_assert(now >= start_time, "Start claim time not arrived");
-      graphene_assert(current_claim_count <= expect_claim_count, "Next claim time has not arrived");
+      graphene_assert(current_claim_count <= expect_claim_count + 1, "Next claim time has not arrived");
 
       // limit claim amount
       uint64_t claim_amount = std::min(total_balance, claim_limit);
