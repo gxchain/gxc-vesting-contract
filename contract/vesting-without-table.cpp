@@ -50,10 +50,10 @@ public:
       uint64_t total_balance = get_balance(_self, contract_asset_id);
 
       // check vesting claim seconds
-      uint64_t current_claim_count = total_claim_count - ceil(1.0 * total_balance / claim_limit);
       uint64_t now = get_head_block_time();
-      uint64_t next_claim_time = start_time + current_claim_count * claim_period_sec;
-      graphene_assert(now >= next_claim_time, "Next vesting time not reached");
+      uint64_t current_claim_count = total_claim_count - total_balance / claim_limit;
+      uint64_t expect_claim_count = (now - start_time) / claim_period_sec;
+      graphene_assert(current_claim_count >= expect_claim_count, "Time has not arrived");
 
       // limit claim amount
       uint64_t claim_amount = std::min(total_balance, claim_limit);
