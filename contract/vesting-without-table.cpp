@@ -49,7 +49,7 @@ public:
       // get contract balance
       uint64_t total_balance = get_balance(_self, contract_asset_id);
 
-      // check vesting claim seconds
+      // check vesting claim count
       uint64_t now = get_head_block_time();
       uint64_t current_claim_count = total_claim_count - total_balance / claim_limit;
       uint64_t expect_claim_count = (now - start_time) / claim_period_sec;
