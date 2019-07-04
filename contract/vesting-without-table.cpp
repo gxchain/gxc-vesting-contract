@@ -26,10 +26,7 @@ const int64_t claim_period_sec = 365 * 24 * 3600;
 const int64_t claim_limit = (uint64_t)500 * 10000 * 100000;
 
 // total claim amount
-const int64_t total_claim_amount = (uint64_t)4000 * 10000 * 100000;
-
-// total claim count
-const int64_t total_claim_count = 8;
+const int64_t total_claim_amount = (uint64_t)3500 * 10000 * 100000;
 
 class vesting : public contract
 {
